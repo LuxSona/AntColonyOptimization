@@ -1,18 +1,31 @@
 from ACO import ACO
 from TSP import TravellingSalesmanProblem
 import numpy as np 
+from utils import coordinates_to_distance_matrix
 
 def main():
-    # Sample: [Denver, Albuquerque, Santa Fe, Las Vegas, Elko]
-    distances = np.array([
-        [0,545,453,971,878],
-        [545,0,94,774,1003],
-        [453,94,0,838,1019],
-        [971,774,839,0,527],
-        [878,1003,1019,527,0],
-        ])
-    labels = ["Denver", "Albuquerque", "Santa Fe", "Las Vegas", "Elko"]
-    problem = TravellingSalesmanProblem(labels, distances)
+    cities = {
+        "Albuquerque": np.array([189,328]),
+        "Daytona Beach": np.array([1682,829]),
+        "Denver": np.array([326,22]),
+        "Santa Fe": np.array([227,293]),
+        "Abilene": np.array([508,567]),
+        "Wichita": np.array([678,196]),
+        "OKC": np.array([651, 358]), 
+        "Conway": np.array([945, 402]),
+        "Memphis": np.array([1090, 400]),
+        "Jackson": np.array([1080, 617]),
+        "Destin": np.array([1321,761]),
+        "Panama City": np.array([1375, 776]),
+        "Lexington": np.array([1424, 177]),
+        "Springfield IL": np.array([1122, 53]),
+        "Columbia": np.array([966, 115]),
+        "Joplin": np.array([831, 248]) 
+    }
+    coordinates = coordinates_to_distance_matrix(cities)
+    labels = list(cities.keys())
+
+    problem = TravellingSalesmanProblem(labels, coordinates)
     optimization = ACO(problem, 5, 0.5, 0.5, 0.3, 3)
     path, length = optimization.iterate(500)
     for item in path:

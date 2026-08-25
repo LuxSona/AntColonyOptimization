@@ -142,8 +142,8 @@ class ACO:
                 best_length = length
                 best_path = path
             self.update_pheromones(delta_txy)
-            print(f"Iteration {iteration}: Length: {length}, Path: {path}")
-            print(f"Best Length: {best_length}, Best Path: {best_path}")
+            print(f"Iteration {iteration}")
+            print(f"Best Length: {best_length}")
         
         return best_path, best_length
     
