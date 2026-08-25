@@ -2,35 +2,33 @@ from ACO import ACO
 from TSP import TravellingSalesmanProblem
 import numpy as np 
 from utils import load_coordinates_from_file
-import argparse
+import json
 
 def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-f", '--file', action='store',required=True, help="The path to the filename contianing the location nodes.")
 
-    args = parser.parse_args()
-    cities = {
-        "Albuquerque": np.array([189,328]),
-        "Daytona Beach": np.array([1682,829]),
-        "Denver": np.array([326,22]),
-        "Santa Fe": np.array([227,293]),
-        "Abilene": np.array([508,567]),
-        "Wichita": np.array([678,196]),
-        "OKC": np.array([651, 358]), 
-        "Conway": np.array([945, 402]),
-        "Memphis": np.array([1090, 400]),
-        "Jackson": np.array([1080, 617]),
-        "Destin": np.array([1321,761]),
-        "Panama City": np.array([1375, 776]),
-        "Lexington": np.array([1424, 177]),
-        "Springfield IL": np.array([1122, 53]),
-        "Columbia": np.array([966, 115]),
-        "Joplin": np.array([831, 248]) 
-    }
-    coordinates, labels = load_coordinates_from_file(args.file)
+    with open("arguments.json") as fp:
+        parameters = json.load(fp)
 
+    #Load parameters into the namespace
+    filename : str = parameters["filename"]
+    n_ants : int = parameters["n_ants"]
+    pheromone_weight : float = parameters["pheromone_weight"]
+    heuristic_weight : float = parameters["heuristic_weight"]
+    evaporation_rate : float = parameters["evaporation_rate"]
+    Q : float = parameters["Q"]
+    coordinates, labels = load_coordinates_from_file(filename)
+    
     problem = TravellingSalesmanProblem(labels, coordinates)
-    optimization = ACO(problem, 5, 0.5, 0.5, 0.3, 3)
+    
+    optimization = ACO(
+        problem,
+        n_ants=n_ants,
+        pheromone_weight=pheromone_weight,
+        heuristic_weight=heuristic_weight,
+        evaporation_rate=evaporation_rate,
+        Q=Q
+    )
+    
     path, length = optimization.iterate(500)
     for item in path:
         fro, to = item
