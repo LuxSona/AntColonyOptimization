@@ -21,7 +21,7 @@ class TravellingSalesmanProblem():
     
 
     
-    def get_linked_destinations(self, index : int) -> np.ndarray[np.float64]:
+    def get_linked_destinations(self, index : int) -> npt.NDArray[np.float64]:
         '''
         Docstring for get_linked_destinations
 

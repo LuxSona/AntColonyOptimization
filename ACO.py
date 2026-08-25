@@ -34,65 +34,74 @@ class ACO:
         self.pheromones = np.ones((self.tsp_size, self.tsp_size))
     
 
-    def ant_tours(self, iterations : int) -> npt.NDArray[np.float64]:
+    def ant_tours(self) -> tuple[npt.NDArray[np.float64], list[tuple[int, int]], float]:
         '''
-        Runs an iterations number of ant tours.
+        Docstring for ant_tours
 
-        :param iterations: The number of iterations for each ant to go through
-        :type iterations: int
-        :return: Returns the change in pheromones
-        :rtype: NDArray[float64]
+        :return: A tuple of the pheromone update, the best route from the ants, and the best length from all the ants.
+        :rtype: tuple[NDArray[float64], list[int], float]
         '''
         total_update : npt.NDArray[np.float64] = np.zeros(shape=((self.tsp_size, self.tsp_size)))
+        best_length : float = float("inf")
+        best_route : list[tuple[int, int]] = []
+        for _ in range(self.n_ants):
+            #Individual update for ants
+            path : list[tuple[int, int]] = []
+            indices = np.array([i for i in range(self.tsp_size)])
+            #initial starting location
+            current_location : int = np.random.choice(indices)
+            starting_city: int = current_location
 
-        #For each iteration
-        for iteration in range(iterations):
-            for ant in range(self.n_ants):
-                #Individual update for ants
-                path = []
-                indices = np.array([i for i in range(self.tsp_size)])
-                #initial starting location
-                current_location : int = np.random.choice(indices)
-                length = 0
-                while indices.size != 0:
-                    indices = indices[indices != current_location]
-                    #Get the available destinations from the tsp
-                    # NOTE - Keep indices monotonically increasing. See comment by probs calculations
-                    mask = np.zeros(self.tsp_size, dtype=bool)
-                    mask[indices] = True  
-                    #Get destinations from here
-                    destinations_from_here = self.tsp.get_linked_destinations(current_location)[mask]
-                    if destinations_from_here.size == 0:
-                        #We have no more destinations and may break
-                        break
-                    #Else, select an edge from the edge selection formula
-                    eta = 1 / destinations_from_here ** self.heuristic_weight #type: ignore
-                    tau = self.pheromones[current_location][mask] ** self.pheromone_weight
+            length = 0
+            while indices.size != 0:
+                indices = indices[indices != current_location]
+                #Get the available destinations from the tsp
+                # NOTE - Keep indices monotonically increasing. See comment by probs calculations
+                mask = np.zeros(self.tsp_size, dtype=bool)
+                mask[indices] = True  
+                #Get destinations from here
+                destinations_from_here = self.tsp.get_linked_destinations(current_location)[mask]
+                if destinations_from_here.size == 0:
+                    #We have no more destinations and may break
+                    break
+                #Else, select an edge from the edge selection formula
+                eta = 1 / destinations_from_here ** self.heuristic_weight #type: ignore
+                tau = self.pheromones[current_location][mask] ** self.pheromone_weight
 
-                    if np.sum(tau*eta) == 0:
-                        #If the sum is zero
-                        probs = np.ones(len(destinations_from_here)) / len(destinations_from_here)
-                    else:
-                        probs = tau*eta / np.sum(tau*eta)
-                    
-                    # NOTE - Keep indices monotonically increasing. This next location calculation relies on Mask and Indices coinciding. IF we shuffle, re-order, or append indices, we risk misaligning probs and our available locations.
-                    # TODO - Eliminate the dependency between monotonically increasing indices and the mask.
-                    next_location : int = np.random.choice(indices, p = probs)
-                    #Get the index of the current location and the next location
-
-                    distance : float = self.tsp.distances[current_location, next_location]
-
-                    path.append((current_location, next_location))
-                    length += distance 
-                    current_location = next_location
+                if np.sum(tau*eta) == 0:
+                    #If the sum is zero
+                    probs = np.ones(len(destinations_from_here)) / len(destinations_from_here)
+                else:
+                    probs = tau*eta / np.sum(tau*eta)
                 
-                if length == 0:
-                    continue
-                for update in path:
-                    updx, updy = update
-                    total_update[updx, updy] += self.Q / length 
+                # NOTE - Keep indices monotonically increasing. This next location calculation relies on Mask and Indices coinciding. IF we shuffle, re-order, or append indices, we risk misaligning probs and our available locations.
+                # TODO - Eliminate the dependency between monotonically increasing indices and the mask.
+                next_location : int = np.random.choice(indices, p = probs)
+                #Get the index of the current location and the next location
+
+                distance : float = self.tsp.distances[current_location, next_location]
+
+                path.append((current_location, next_location))
+                length += distance 
+                current_location = next_location
             
-        return total_update
+            if indices.size == 0:
+                #An ant exhausted all the cities, so we can add the edge from current location to starting location.
+                path.append((current_location, starting_city))
+                length += self.tsp.distances[current_location,starting_city]
+            
+
+            if length == 0:
+                continue
+            for update in path:
+                updx, updy = update
+                total_update[updx, updy] += self.Q / length 
+            
+            if length < best_length:
+                best_length = length
+                best_route = path 
+
+        return total_update, best_route, best_length
 
 
     def update_pheromones(self, delta_txy : npt.NDArray[np.float64]):
@@ -116,3 +125,25 @@ class ACO:
         rho = self.evaporation_rate
         self.pheromones = (1-rho) * self.pheromones + delta_txy
 
+    def iterate(self, n_iterations: int) -> tuple[list[tuple[int, int]], float]:
+        '''
+        Docstring for iterate
+
+        :param n_iterations: Number of iterations
+        :type n_iterations: int
+        :return: The pheromone update, best path, and best path length.
+        :rtype: tuple[list[tuple[int, int]], float]
+        '''
+        best_path : list[tuple[int, int]] = []
+        best_length : float  = float("inf")
+        for iteration in range(n_iterations):
+            delta_txy, path, length = self.ant_tours()
+            if length < best_length:
+                best_length = length
+                best_path = path
+            self.update_pheromones(delta_txy)
+            print(f"Iteration {iteration}: Length: {length}, Path: {path}")
+            print(f"Best Length: {best_length}, Best Path: {best_path}")
+        
+        return best_path, best_length
+    
