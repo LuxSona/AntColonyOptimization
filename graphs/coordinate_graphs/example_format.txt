@@ -1,0 +1,4 @@
+location_a,1.54,1.23
+location_b,1.23,1.29
+location_c,-1.09,1.02
+location_d,1.09,-10.2

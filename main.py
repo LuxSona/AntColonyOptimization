@@ -2,8 +2,13 @@ from ACO import ACO
 from TSP import TravellingSalesmanProblem
 import numpy as np 
 from utils import load_coordinates_from_file
+import argparse
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f", '--file', action='store',required=True, help="The path to the filename contianing the location nodes.")
+
+    args = parser.parse_args()
     cities = {
         "Albuquerque": np.array([189,328]),
         "Daytona Beach": np.array([1682,829]),
@@ -22,7 +27,7 @@ def main():
         "Columbia": np.array([966, 115]),
         "Joplin": np.array([831, 248]) 
     }
-    coordinates, labels = load_coordinates_from_file("graphs/coordinate_graphs/keyboard.txt")
+    coordinates, labels = load_coordinates_from_file(args.file)
 
     problem = TravellingSalesmanProblem(labels, coordinates)
     optimization = ACO(problem, 5, 0.5, 0.5, 0.3, 3)
