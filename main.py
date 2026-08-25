@@ -1,7 +1,7 @@
 from ACO import ACO
 from TSP import TravellingSalesmanProblem
 import numpy as np 
-from utils import coordinates_to_distance_matrix
+from utils import load_coordinates_from_file
 
 def main():
     cities = {
@@ -22,8 +22,7 @@ def main():
         "Columbia": np.array([966, 115]),
         "Joplin": np.array([831, 248]) 
     }
-    coordinates = coordinates_to_distance_matrix(cities)
-    labels = list(cities.keys())
+    coordinates, labels = load_coordinates_from_file("graphs/coordinate_graphs/keyboard.txt")
 
     problem = TravellingSalesmanProblem(labels, coordinates)
     optimization = ACO(problem, 5, 0.5, 0.5, 0.3, 3)
