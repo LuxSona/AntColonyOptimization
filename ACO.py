@@ -1,6 +1,5 @@
 import numpy as np
 import numpy.typing as npt
-import random 
 from TSP import TravellingSalesmanProblem
 
 
@@ -23,6 +22,9 @@ class ACO:
     :type Q: float
     """
     def __init__(self, TSP : TravellingSalesmanProblem, n_ants : int, pheromone_weight: float, heuristic_weight: float, evaporation_rate: float, Q : float):
+        if n_ants < 0 or pheromone_weight < 0 or heuristic_weight < 0 or evaporation_rate < 0 or Q < 0:
+            raise ValueError("Negative values for any hyperparameters are not allowed. Double check all of your hyperparameters.")
+        
         self.tsp: TravellingSalesmanProblem  = TSP
         self.tsp_size : int = self.tsp.n
         self.n_ants: int = n_ants
@@ -134,6 +136,12 @@ class ACO:
         :return: The pheromone update, best path, and best path length.
         :rtype: tuple[list[tuple[int, int]], float]
         '''
+        if type(n_iterations) != int:
+            raise ValueError("Iterations are not of type int")
+        
+        if n_iterations < 0:
+            raise ValueError("Iterations cannot be less than 0")
+        
         best_path : list[tuple[int, int]] = []
         best_length : float  = float("inf")
         for iteration in range(n_iterations):
@@ -142,8 +150,6 @@ class ACO:
                 best_length = length
                 best_path = path
             self.update_pheromones(delta_txy)
-            print(f"Iteration {iteration}")
-            print(f"Best Length: {best_length}")
         
         return best_path, best_length
     

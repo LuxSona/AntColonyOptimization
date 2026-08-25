@@ -1,12 +1,11 @@
 from ACO import ACO
 from TSP import TravellingSalesmanProblem
-import numpy as np 
 from utils import load_coordinates_from_file
 import json
 
 def main():
 
-    with open("arguments.json") as fp:
+    with open("arguments.json", 'r', encoding='utf-8') as fp:
         parameters = json.load(fp)
 
     #Load parameters into the namespace
@@ -16,6 +15,7 @@ def main():
     heuristic_weight : float = parameters["heuristic_weight"]
     evaporation_rate : float = parameters["evaporation_rate"]
     Q : float = parameters["Q"]
+    iterations: int = parameters["iterations"]
     coordinates, labels = load_coordinates_from_file(filename)
     
     problem = TravellingSalesmanProblem(labels, coordinates)
@@ -28,12 +28,13 @@ def main():
         evaporation_rate=evaporation_rate,
         Q=Q
     )
-    
-    path, length = optimization.iterate(500)
+
+    path, length = optimization.iterate(iterations)
+    verbose_path : list[str] = []
     for item in path:
-        fro, to = item
-        print(f"{problem.indices_to_labels[fro]} -> {problem.indices_to_labels[to]}")
-    print(f"Total Length: {length}")
+        _, to = item
+        verbose_path.append(problem.indices_to_labels[to])
+    print(verbose_path, length)
 
 
 if __name__ == "__main__":

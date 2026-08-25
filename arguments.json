@@ -1,0 +1,9 @@
+{
+    "filename": "graphs\\coordinate_graphs\\example_format.txt",
+    "n_ants": 5,
+    "pheromone_weight": 0.5,
+    "heuristic_weight": 0.5,
+    "evaporation_rate": 0.3,
+    "Q": 3,
+    "iterations": 500
+}
