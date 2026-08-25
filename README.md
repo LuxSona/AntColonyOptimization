@@ -45,7 +45,7 @@ Edit `arguments.json` and update your hyperparameters and filepath as necessary.
 
 # Version History
 * 0.1.0
-** Initial Release
+    * Initial Release
 
 # Disclosures 
 A **Large Language Model** was *consulted* during the writing of this repository to aid in some debugging. *However*, at no point was any code generated. All code and text written in this repository is entirely human authored. The author takes full responsibility for the code provided. The precise model used was Anthropic's *Sonnet 5* model.
